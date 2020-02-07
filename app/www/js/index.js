@@ -1,10 +1,9 @@
 // Max/MSP server.
-var ip = '192.168.1.5';
+var ip = '2.1.0.116';
 var port = 2020;
 
 // Parameters.
 var sensor_speed = 100;             // time between sensor readings (ms)
-var ble_speed = 100;                // time between bluetooth scans (ms)
 var points = {                      // beacon coordinates
   'iStage1': [0,  0,  1],
   'iStage2': [0,  1,  1],
@@ -60,9 +59,8 @@ var sensors = {
     sensors.values[index] = value;
     var args = [uuid];
 
-    for (var i = 0; i < sensors.values.length; i++) {
+    for (var i = 0; i < sensors.values.length; i++)
       args.push.apply(args, sensors.values[i]);
-    }
 
     osc.send({
       remoteAddress: ip,
@@ -83,9 +81,9 @@ var pos = {
   calibration_distances: [0,1].map(c => {
     var dists = {};
     beacons.map(b => {
-      dists[b] = Math.sqrt([0,1,2].reduce((s, d) =>
-        s + Math.pow((points[b][d] - calpoints[c][d]) * stagedim[d], 2)
-      ))
+      squares = [0,1,2].map(d => Math.pow((points[b][d] - calpoints[c][d]) * stagedim[d], 2));
+      sum_squares = squares.reduce((s, p) => s + p)
+      dists[b] = Math.sqrt(sum_squares);
     });
     return dists;
   }),
@@ -117,6 +115,7 @@ var pos = {
       pos.log[pos.state][device.name].splice(0, 1);
   },
 
+  // Compute average RSSI across calibration window.
   compute_calibration_rssis: () => {
     beacons.map(b => {
       pos.rssi[pos.state][b] =
@@ -252,15 +251,16 @@ var app = {
           remoteAddress: ip,
           remotePort: port,
           address: '/rssi/' + device.name,
-          arguments: [device.rssi]
+          arguments: [uuid, device.rssi]
         });
       }
     },
 
+    // Update calibration debug info.
     update_calibration_text: c => {
       beacons.map(b => {
-        var td_rssi = document.getElementsByClassName(b + '_rssi' + c)[0]
         var td_dist = document.getElementsByClassName(b + '_d' + c)[0];
+        var td_rssi = document.getElementsByClassName(b + '_rssi' + c)[0];
         var td_ple = document.getElementsByClassName(b + '_ple')[0];
 
         if (td_dist && pos.calibration_distances[c].hasOwnProperty(b))
@@ -274,6 +274,7 @@ var app = {
       });
     },
 
+    // Update measurement debug info.
     update_measurement_text: () => {
       // RSSI and Distance.
       beacons.map(b => {
@@ -302,6 +303,8 @@ var app = {
     // When app is ready.
     onDeviceReady: () => {
         var speech_result = '';
+
+        [0,1].map(c => app.update_calibration_text(c));
 
         var WifiManager = cordova.plugins.WifiManager;
         WifiManager.onwifistatechanged = data => {
@@ -351,26 +354,7 @@ var app = {
           };
         });
 
-        // Popup dialog for typed input.
-        document.getElementsByClassName('speak2')[0].onclick = () => {
-          navigator.notification.prompt(
-            'What would you like to say to Odo?',
-            res => {
-              var args = [uuid];
-              args.push.apply(args, res.input1.split(' '));
-
-              osc.send({
-                remoteAddress: ip,
-                remotePort: port,
-                address: '/speak',
-                arguments: args
-              });
-            },
-            'Speak to Odo',
-            ['Ok','Cancel']
-          );
-        }
-
+        // Set target IP for OSC packets.
         document.getElementsByClassName('ip')[0].onclick = () => {
           navigator.notification.prompt(
             'Set target IP address:',
@@ -394,6 +378,26 @@ var app = {
             });
           });
         };
+
+        // Popup dialog for typed input.
+        document.getElementsByClassName('speak2')[0].onclick = () => {
+          navigator.notification.prompt(
+            'What would you like to say to Odo?',
+            res => {
+              var args = [uuid];
+              args.push.apply(args, res.input1.split(' '));
+
+              osc.send({
+                remoteAddress: ip,
+                remotePort: port,
+                address: '/speak',
+                arguments: args
+              });
+            },
+            'Speak to Odo',
+            ['Ok','Cancel']
+          );
+        }
     }
 };
 

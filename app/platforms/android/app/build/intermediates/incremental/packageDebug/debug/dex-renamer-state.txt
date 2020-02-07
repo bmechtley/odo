@@ -1,4 +1,4 @@
-#Fri Feb 07 14:21:08 MST 2020
+#Fri Feb 07 16:39:44 MST 2020
 base.0=/Users/brandon/github/odo/app/platforms/android/app/build/intermediates/transforms/dexMerger/debug/0
 path.0=classes.dex
 renamed.0=classes.dex

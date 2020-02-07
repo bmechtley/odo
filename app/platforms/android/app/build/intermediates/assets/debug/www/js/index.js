@@ -1,5 +1,5 @@
 // Max/MSP server.
-var ip = '192.168.1.5';
+var ip = '2.1.0.116';
 var port = 2020;
 
 // Parameters.
@@ -30,7 +30,6 @@ var uuid;                           // UUID of phone.
 
 beacons = Object.keys(points);      // names of beacons
 var speech_result = '';             // results from "speak to Odo"
-var position = [];                  // phone position in normalize coordinates
 
 // Median filter.
 const median = arr => {
@@ -80,12 +79,13 @@ var pos = {
   rssi: [{}, {}],     // avg. RSSI for each beacon for each calib. point.
   log: [{}, {}],      // RSSIs for each beacon for each calib. point.
   pathloss: [{}, {}], // Pathloss eponent for each beacon for each calib. point.
+  position: [],
   calibration_distances: [0,1].map(c => {
     var dists = {};
     beacons.map(b => {
-      dists[b] = Math.sqrt([0,1,2].reduce((s, d) =>
-        s + Math.pow((points[b][d] - calpoints[c][d]) * stagedim[d], 2)
-      ))
+      squares = [0,1,2].map(d => Math.pow((points[b][d] - calpoints[c][d]) * stagedim[d], 2));
+      sum_squares = squares.reduce((s, p) => s + p)
+      dists[b] = Math.sqrt(sum_squares);
     });
     return dists;
   }),
@@ -117,6 +117,7 @@ var pos = {
       pos.log[pos.state][device.name].splice(0, 1);
   },
 
+  // Compute average RSSI across calibration window.
   compute_calibration_rssis: () => {
     beacons.map(b => {
       pos.rssi[pos.state][b] =
@@ -161,13 +162,13 @@ var pos = {
     );
 
     if (pos.state == 'done' && distances_computed) {
-      pts = beacons.map(b => points[b]);
-      dists = beacons.map(b => distances[b]);
-
-      position = find_position(pts, dists, alpha=2, iter=2000, ratio=0.99);
-
-      return position;
-    }
+      return find_position(
+        beacons.map(b => points[b]),
+        beacons.map(b => distances[b]),
+        alpha=2, iter=2000, ratio=0.99
+      );
+    } else
+      return [0, 0];
   },
 
   // Update calibration with a beacons's RSSI.
@@ -234,10 +235,10 @@ var app = {
           app.update_calibration_text(old_state);
 
         if (pos.state == 'done') {
-          position = pos.triangulate(); // Triangulate position.
+          pos.position = pos.triangulate(); // Triangulate position.
 
           var values = [uuid];
-          values.push.apply(values, position);
+          values.push.apply(values, pos.position);
 
           // Send over OSC to Max/MSP.
           osc.send({
@@ -252,15 +253,16 @@ var app = {
           remoteAddress: ip,
           remotePort: port,
           address: '/rssi/' + device.name,
-          arguments: [device.rssi]
+          arguments: [uuid, device.rssi]
         });
       }
     },
 
+    // Update calibration debug info.
     update_calibration_text: c => {
       beacons.map(b => {
-        var td_rssi = document.getElementsByClassName(b + '_rssi' + c)[0]
         var td_dist = document.getElementsByClassName(b + '_d' + c)[0];
+        var td_rssi = document.getElementsByClassName(b + '_rssi' + c)[0];
         var td_ple = document.getElementsByClassName(b + '_ple')[0];
 
         if (td_dist && pos.calibration_distances[c].hasOwnProperty(b))
@@ -274,6 +276,7 @@ var app = {
       });
     },
 
+    // Update measurement debug info.
     update_measurement_text: () => {
       // RSSI and Distance.
       beacons.map(b => {
@@ -287,7 +290,7 @@ var app = {
       });
 
       // Position.
-      document.getElementsByClassName('position')[0].innerHTML = position;
+      document.getElementsByClassName('position')[0].innerHTML = pos.position;
 
       // How many points have been calibrated.
       var c = pos.min_calibration_complete();
@@ -302,6 +305,8 @@ var app = {
     // When app is ready.
     onDeviceReady: () => {
         var speech_result = '';
+
+        [0,1].map(c => app.update_calibration_text(c));
 
         var WifiManager = cordova.plugins.WifiManager;
         WifiManager.onwifistatechanged = data => {
@@ -351,26 +356,7 @@ var app = {
           };
         });
 
-        // Popup dialog for typed input.
-        document.getElementsByClassName('speak2')[0].onclick = () => {
-          navigator.notification.prompt(
-            'What would you like to say to Odo?',
-            res => {
-              var args = [uuid];
-              args.push.apply(args, res.input1.split(' '));
-
-              osc.send({
-                remoteAddress: ip,
-                remotePort: port,
-                address: '/speak',
-                arguments: args
-              });
-            },
-            'Speak to Odo',
-            ['Ok','Cancel']
-          );
-        }
-
+        // Set target IP for OSC packets.
         document.getElementsByClassName('ip')[0].onclick = () => {
           navigator.notification.prompt(
             'Set target IP address:',
@@ -394,6 +380,26 @@ var app = {
             });
           });
         };
+
+        // Popup dialog for typed input.
+        document.getElementsByClassName('speak2')[0].onclick = () => {
+          navigator.notification.prompt(
+            'What would you like to say to Odo?',
+            res => {
+              var args = [uuid];
+              args.push.apply(args, res.input1.split(' '));
+
+              osc.send({
+                remoteAddress: ip,
+                remotePort: port,
+                address: '/speak',
+                arguments: args
+              });
+            },
+            'Speak to Odo',
+            ['Ok','Cancel']
+          );
+        }
     }
 };
 
