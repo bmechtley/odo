@@ -1,0 +1,33 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-osc": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "odosensors": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "cordova-plugin-device": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "cordova-plugin-ble-central": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "cordova-plugin-speechrecognition": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "cordova-plugin-dialogs": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "cordova-plugin-android-wifi-manager": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    }
+  },
+  "dependent_plugins": {}
+}

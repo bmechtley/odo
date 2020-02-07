@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        id="odosensors"
+        version="0.7.0">
+
+  <name>Odo Sensors</name>
+
+  <engines>
+    <engine name="cordova" version=">=3.4.0"/>
+  </engines>
+
+  <asset src="www/odosensors.js" target="js/odosensors.js"/>
+
+  <js-module src="www/odosensors.js" name="odosensors">
+    <clobbers target="odosensors" />
+  </js-module>
+
+  <platform name="android">
+
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="OdoSensors">
+        <param name="android-package" value="edu.asu.ame.plugin.OdoSensors"/>
+      </feature>
+    </config-file>
+
+    <source-file src="src/android/OdoSensors.java" target-dir="src/edu/asu/ame/plugin/"/>
+  </platform>
+
+
+</plugin>

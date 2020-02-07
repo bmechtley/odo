@@ -1,0 +1,58 @@
+{
+  "odosensors": {
+    "source": {
+      "type": "local",
+      "path": "/Users/brandon/Desktop/odo/node_modules/OdoSensors"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-osc": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-osc"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-device": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-device"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-ble-central": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-ble-central"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-speechrecognition": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-speechrecognition"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-dialogs": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-dialogs@^2.0.2"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "cordova-plugin-android-wifi-manager": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-android-wifi-manager@^1.2.1"
+    },
+    "is_top_level": true,
+    "variables": {}
+  }
+}

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-osc"
+        version="1.0.3">
+    <name>OSC</name>
+    <description>Cordova OSC Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova, osc</keywords>
+    <repo>https://github.com/sy1vain/cordova-osc-plugin</repo>
+    <issue>https://github.com/sy1vain/cordova-osc-plugin/issues</issue>
+
+    <js-module src="www/OSC.js" name="OSC">
+        <clobbers target="window.OSC" />
+    </js-module>
+
+    <!-- android -->
+    <platform name="android">
+    	<!-- bind the correct module -->
+    	<config-file target="res/xml/config.xml" parent="/*">
+            <feature name="OSC" >
+                <param name="android-package" value="nl.sylvain.cordova.osc.OSCUtils"/>
+            </feature>
+        </config-file>
+
+        <!-- allow it to access the network -->
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.INTERNET" />
+        </config-file>
+
+        <!-- copy the source files -->
+        <source-file src="src/android/OSCUtils.java" target-dir="src/nl/sylvain/cordova/osc" />
+        <source-file src="src/android/com/illposed/osc/AbstractOSCPacket.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/AddressSelector.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/OSCBundle.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/OSCImpulse.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/OSCListener.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/OSCMessage.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/OSCPacket.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/OSCPort.java" target-dir="src/com/illposed/osc" />
+        <source-file src="src/android/com/illposed/osc/utility/JavaRegexAddressSelector.java" target-dir="src/com/illposed/osc/utility" />
+        <source-file src="src/android/com/illposed/osc/utility/OSCByteArrayToJavaConverter.java" target-dir="src/com/illposed/osc/utility" />
+        <source-file src="src/android/com/illposed/osc/utility/OSCJavaToByteArrayConverter.java" target-dir="src/com/illposed/osc/utility" />
+        <source-file src="src/android/com/illposed/osc/utility/OSCPacketDispatcher.java" target-dir="src/com/illposed/osc/utility" />
+        <source-file src="src/android/com/illposed/osc/utility/OSCPatternAddressSelector.java" target-dir="src/com/illposed/osc/utility" />
+    </platform>
+
+    <!-- ios -->
+    <platform name="ios">
+        <!-- bind the correct module -->
+        <config-file target="config.xml" parent="/*">
+            <feature name="OSC">
+                <param name="ios-package" value="CDVOSC" />
+            </feature>
+        </config-file>
+
+        <!-- copy the source files -->
+        <header-file src="src/ios/CDVOSC.h" />
+        <source-file src="src/ios/CDVOSC.m" />
+
+        <header-file src="src/ios/CocoaOSC/AsyncSocket.h" />
+        <source-file src="src/ios/CocoaOSC/AsyncSocket.m" />
+        <header-file src="src/ios/CocoaOSC/AsyncUdpSocket.h" />
+        <source-file src="src/ios/CocoaOSC/AsyncUdpSocket.m" />
+        <header-file src="src/ios/CocoaOSC/CocoaOSC.h" />
+        <header-file src="src/ios/CocoaOSC/NS+OSCAdditions.h" />
+        <source-file src="src/ios/CocoaOSC/NS+OSCAdditions.m" />
+        <header-file src="src/ios/CocoaOSC/OSCConnection.h" />
+        <source-file src="src/ios/CocoaOSC/OSCConnection.m" />
+        <header-file src="src/ios/CocoaOSC/OSCConnectionDelegate.h" />
+        <header-file src="src/ios/CocoaOSC/OSCDispatcher.h" />
+        <source-file src="src/ios/CocoaOSC/OSCDispatcher.m" />
+        <header-file src="src/ios/CocoaOSC/OSCPacket.h" />
+        <source-file src="src/ios/CocoaOSC/OSCPacket.m" />
+        <header-file src="src/ios/CocoaOSC/RegexKitLite.h" />
+        <source-file src="src/ios/CocoaOSC/RegexKitLite.m" compiler-flags="-fno-objc-arc" />
+
+        <framework src="libicucore.dylib" />
+        <framework src="Security.framework" />
+        <framework src="CFNetwork.framework" />
+
+    </platform>
+
+    <!-- osx -->
+    <platform name="osx">
+        <!-- bind the correct module -->
+        <config-file target="config.xml" parent="/*">
+            <feature name="OSC">
+                <param name="osx-package" value="CDVOSC" />
+            </feature>
+        </config-file>
+
+        <!-- copy the source files -->
+        <header-file src="src/ios/CDVOSC.h" />
+        <source-file src="src/ios/CDVOSC.m" />
+
+        <header-file src="src/ios/CocoaOSC/AsyncSocket.h" />
+        <source-file src="src/ios/CocoaOSC/AsyncSocket.m" />
+        <header-file src="src/ios/CocoaOSC/AsyncUdpSocket.h" />
+        <source-file src="src/ios/CocoaOSC/AsyncUdpSocket.m" />
+        <header-file src="src/ios/CocoaOSC/CocoaOSC.h" />
+        <header-file src="src/ios/CocoaOSC/NS+OSCAdditions.h" />
+        <source-file src="src/ios/CocoaOSC/NS+OSCAdditions.m" />
+        <header-file src="src/ios/CocoaOSC/OSCConnection.h" />
+        <source-file src="src/ios/CocoaOSC/OSCConnection.m" />
+        <header-file src="src/ios/CocoaOSC/OSCConnectionDelegate.h" />
+        <header-file src="src/ios/CocoaOSC/OSCDispatcher.h" />
+        <source-file src="src/ios/CocoaOSC/OSCDispatcher.m" />
+        <header-file src="src/ios/CocoaOSC/OSCPacket.h" />
+        <source-file src="src/ios/CocoaOSC/OSCPacket.m" />
+        <header-file src="src/ios/CocoaOSC/RegexKitLite.h" />
+        <source-file src="src/ios/CocoaOSC/RegexKitLite.m" compiler-flags="-fno-objc-arc" />
+
+        <framework src="libicucore.dylib" />
+        <framework src="Security.framework" />
+        <framework src="CFNetwork.framework" />
+
+    </platform>
+
+</plugin>

@@ -1,0 +1,59 @@
+{
+  "_from": "cordova-plugin-osc",
+  "_id": "cordova-plugin-osc@1.0.3",
+  "_inBundle": false,
+  "_integrity": "sha512-RTskpJU7zDpQ2QEia5KN7/iOZJXRqKI8558701L+u9BiBY7s2vBum9RsA7u4nlZwkckxMiUXTUnfqI6GaNcD8A==",
+  "_location": "/cordova-plugin-osc",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "cordova-plugin-osc",
+    "name": "cordova-plugin-osc",
+    "escapedName": "cordova-plugin-osc",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-osc/-/cordova-plugin-osc-1.0.3.tgz",
+  "_shasum": "a9db13438b813f27604f57ea64cd45e6216fd032",
+  "_spec": "cordova-plugin-osc",
+  "_where": "/Users/brandon/Desktop/odo",
+  "author": {
+    "name": "sy1vain"
+  },
+  "bugs": {
+    "url": "https://github.com/sy1vain/cordova-plugin-osc/issues"
+  },
+  "bundleDependencies": false,
+  "cordova": {
+    "id": "cordova-plugin-osc",
+    "platforms": [
+      "android",
+      "ios",
+      "osx"
+    ]
+  },
+  "deprecated": false,
+  "description": "Cordova OSC Plugin",
+  "homepage": "https://github.com/sy1vain/cordova-plugin-osc#readme",
+  "keywords": [
+    "cordova",
+    "osc",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "cordova-osx"
+  ],
+  "license": "Apache 2.0",
+  "name": "cordova-plugin-osc",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sy1vain/cordova-plugin-osc.git"
+  },
+  "version": "1.0.3"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "OdoSensors",
+  "version": "0.7.0",
+  "description": "Android sensors for Odo",
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "sensors"
+  ],
+  "bugs": {},
+  "author": "Odo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bmechtley/odosensors.git"
+  },
+  "engines": {
+    "cordova": ">=3.4.0"
+  },
+  "cordova": {
+    "id": "edu.asu.ame.plugin.OdoSensors",
+    "platforms": [
+      "android"
+    ]
+  }
+}
