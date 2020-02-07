@@ -83,7 +83,7 @@ void BLEAdvertising::addServiceUUID(const char* serviceUUID) {
 } // addServiceUUID
 
 
-void BLEAdvertising:setChannelMap(esp_ble_adv_channel_t map) {
+void BLEAdvertising::setChannelMap(esp_ble_adv_channel_t map) {
 	m_advParams.channel_map = map;
 }
 /**
