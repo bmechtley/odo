@@ -30,7 +30,6 @@ var uuid;                           // UUID of phone.
 
 beacons = Object.keys(points);      // names of beacons
 var speech_result = '';             // results from "speak to Odo"
-var position = [];                  // phone position in normalize coordinates
 
 // Median filter.
 const median = arr => {
@@ -80,6 +79,7 @@ var pos = {
   rssi: [{}, {}],     // avg. RSSI for each beacon for each calib. point.
   log: [{}, {}],      // RSSIs for each beacon for each calib. point.
   pathloss: [{}, {}], // Pathloss eponent for each beacon for each calib. point.
+  position: [],
   calibration_distances: [0,1].map(c => {
     var dists = {};
     beacons.map(b => {
@@ -161,13 +161,13 @@ var pos = {
     );
 
     if (pos.state == 'done' && distances_computed) {
-      pts = beacons.map(b => points[b]);
-      dists = beacons.map(b => distances[b]);
-
-      position = find_position(pts, dists, alpha=2, iter=2000, ratio=0.99);
-
-      return position;
-    }
+      return find_position(
+        beacons.map(b => points[b]),
+        beacons.map(b => distances[b]),
+        alpha=2, iter=2000, ratio=0.99
+      );
+    } else
+      return [0, 0];
   },
 
   // Update calibration with a beacons's RSSI.
@@ -234,10 +234,10 @@ var app = {
           app.update_calibration_text(old_state);
 
         if (pos.state == 'done') {
-          position = pos.triangulate(); // Triangulate position.
+          pos.position = pos.triangulate(); // Triangulate position.
 
           var values = [uuid];
-          values.push.apply(values, position);
+          values.push.apply(values, pos.position);
 
           // Send over OSC to Max/MSP.
           osc.send({
@@ -287,7 +287,7 @@ var app = {
       });
 
       // Position.
-      document.getElementsByClassName('position')[0].innerHTML = position;
+      document.getElementsByClassName('position')[0].innerHTML = pos.position;
 
       // How many points have been calibrated.
       var c = pos.min_calibration_complete();
