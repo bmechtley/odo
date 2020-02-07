@@ -75,7 +75,7 @@ var sensors = {
 }
 
 // Calibration object.
-var positioning = {
+var pos = {
   state: -1,          // ": calib. point 0, 1: calib. point 1, "done": calc. positions.
   rssi: [{}, {}],     // avg. RSSI for each beacon for each calib. point.
   log: [{}, {}],      // RSSIs for each beacon for each calib. point.
@@ -95,8 +95,8 @@ var positioning = {
   min_calibration_complete: () => {
     return [0,1].map(state => {
       return beacons.reduce((acc, b) =>
-        positioning.log[state].hasOwnProperty(b) ?
-        Math.min(positioning.log[state][b].length, acc) :
+        pos.log[state].hasOwnProperty(b) ?
+        Math.min(pos.log[state][b].length, acc) :
         0,
         1000
       );
@@ -105,34 +105,34 @@ var positioning = {
 
   // Collect calibration measurements for each calibration point.
   collect_calibration_measurements: device => {
-    if (!positioning.log[positioning.state].hasOwnProperty(device.name))
-      positioning.log[positioning.state][device.name] = [];
+    if (!pos.log[pos.state].hasOwnProperty(device.name))
+      pos.log[pos.state][device.name] = [];
 
-    positioning.log[positioning.state][device.name].push(rssis[device.name]);
+    pos.log[pos.state][device.name].push(rssis[device.name]);
 
     if (
-      positioning.log[positioning.state][device.name].length >
+      pos.log[pos.state][device.name].length >
       calibration_count
     )
-      positioning.log[positioning.state][device.name].splice(0, 1);
+      pos.log[pos.state][device.name].splice(0, 1);
   },
 
   compute_calibration_rssis: () => {
     beacons.map(b => {
-      positioning.rssi[positioning.state][b] =
-        positioning.log[positioning.state][b].reduce((a, b) => a + b) /
-        positioning.log[positioning.state][b].length;
+      pos.rssi[pos.state][b] =
+        pos.log[pos.state][b].reduce((a, b) => a + b) /
+        pos.log[pos.state][b].length;
     });
   },
 
   // Compute the average PLE between the phone and each beacon.
   compute_pathloss: () => {
     beacons.map(b => {
-      var cal_dist = [0,1].map(c => positioning.calibration_distances[c][b]);
-      var cal_rssi = [0,1].map(c => positioning.rssi[c][b]);
+      var cal_dist = [0,1].map(c => pos.calibration_distances[c][b]);
+      var cal_rssi = [0,1].map(c => pos.rssi[c][b]);
 
-      if (!positioning.pathloss.hasOwnProperty(b)) {
-        positioning.pathloss[b] = (cal_rssi[0] - cal_rssi[1]) / (
+      if (!pos.pathloss.hasOwnProperty(b)) {
+        pos.pathloss[b] = (cal_rssi[0] - cal_rssi[1]) / (
           10 * Math.log10(cal_dist[1] / cal_dist[0])
         );
       }
@@ -141,12 +141,12 @@ var positioning = {
 
   // If calibration is done, compute distance to the beacon.
   compute_distance: device => {
-    if (positioning.state == 'done') {
+    if (pos.state == 'done') {
       var b = device.name;
 
       var distcalc = [0,1].map(
-        d => positioning.calibration_distances[d][b] * Math.pow(
-          10, (positioning.rssi[d][b] - rssis[device.name]) / (10 * positioning.pathloss[b])
+        d => pos.calibration_distances[d][b] * Math.pow(
+          10, (pos.rssi[d][b] - rssis[device.name]) / (10 * pos.pathloss[b])
         )
       );
       distances[b] = distcalc.reduce((s, d) => s + d) / distcalc.length;
@@ -160,7 +160,7 @@ var positioning = {
       true
     );
 
-    if (positioning.state == 'done' && distances_computed) {
+    if (pos.state == 'done' && distances_computed) {
       pts = beacons.map(b => points[b]);
       dists = beacons.map(b => distances[b]);
 
@@ -182,16 +182,16 @@ var positioning = {
           When done, if both points are calibrated, advance to pathloss state.
           Otherwise, go to "none" state and wait for user to calibrate other point.
     */
-    if (positioning.state == 0 || positioning.state == 1) {
-        positioning.collect_calibration_measurements(device);
+    if (pos.state == 0 || pos.state == 1) {
+        pos.collect_calibration_measurements(device);
 
-        var c = positioning.min_calibration_complete();
+        var c = pos.min_calibration_complete();
 
-        if (c[positioning.state] == calibration_count) {
-          positioning.compute_calibration_rssis();
+        if (c[pos.state] == calibration_count) {
+          pos.compute_calibration_rssis();
           navigator.notification.beep();
 
-          positioning.state = (c[1-positioning.state] == calibration_count) ? 'pathloss' : 'none';
+          pos.state = (c[1-pos.state] == calibration_count) ? 'pathloss' : 'none';
         }
     }
 
@@ -199,9 +199,9 @@ var positioning = {
       STATE: pathloss -> done.
         Compute the PLE between the phone and each beacon.
     */
-    if (positioning.state == 'pathloss') {
-      positioning.compute_pathloss();
-      positioning.state = 'done';
+    if (pos.state == 'pathloss') {
+      pos.compute_pathloss();
+      pos.state = 'done';
     }
   }
 };
@@ -224,17 +224,17 @@ var app = {
         device.hasOwnProperty('name') &&
         points.hasOwnProperty(device.name)
       ) {
-        var old_state = positioning.state;
+        var old_state = pos.state;
 
-        positioning.update(device);             // Calibration.
-        positioning.compute_distance(device);   // Compute distance to beacons.
+        pos.update(device);             // Calibration.
+        pos.compute_distance(device);   // Compute distance to beacons.
 
         app.update_measurement_text();
-        if ((old_state == 0 || old_state == 1) && positioning.state != old_state)
+        if ((old_state == 0 || old_state == 1) && pos.state != old_state)
           app.update_calibration_text(old_state);
 
-        if (positioning.state == 'done') {
-          position = positioning.triangulate(); // Triangulate position.
+        if (pos.state == 'done') {
+          position = pos.triangulate(); // Triangulate position.
 
           var values = [uuid];
           values.push.apply(values, position);
@@ -263,14 +263,14 @@ var app = {
         var td_dist = document.getElementsByClassName(b + '_d' + c)[0];
         var td_ple = document.getElementsByClassName(b + '_ple')[0];
 
-        if (td_dist && positioning.calibration_distances[c].hasOwnProperty(b))
-          td_dist.innerHTML = positioning.calibration_distances[c][b].toFixed(2);
+        if (td_dist && pos.calibration_distances[c].hasOwnProperty(b))
+          td_dist.innerHTML = pos.calibration_distances[c][b].toFixed(2);
 
-        if (td_rssi && positioning.rssi[c].hasOwnProperty(b))
-          td_rssi.innerHTML = positioning.rssi[c][b].toFixed(2);
+        if (td_rssi && pos.rssi[c].hasOwnProperty(b))
+          td_rssi.innerHTML = pos.rssi[c][b].toFixed(2);
 
-        if (td_ple && positioning.pathloss.hasOwnProperty(b))
-          td_ple.innerHTML = positioning.pathloss[b].toFixed(2);
+        if (td_ple && pos.pathloss.hasOwnProperty(b))
+          td_ple.innerHTML = pos.pathloss[b].toFixed(2);
       });
     },
 
@@ -290,11 +290,11 @@ var app = {
       document.getElementsByClassName('position')[0].innerHTML = position;
 
       // How many points have been calibrated.
-      var c = positioning.min_calibration_complete();
+      var c = pos.min_calibration_complete();
       [0,1].map(pt => {
         var text = '';
         if (c[pt] == calibration_count) text = 'Done.';
-        else if (c[pt] != 0 || positioning.state == pt) text = c[pt] + '/' + calibration_count + ' points.'
+        else if (c[pt] != 0 || pos.state == pt) text = c[pt] + '/' + calibration_count + ' points.'
         document.getElementsByClassName('calpts' + pt)[0].innerHTML = text;
       });
     },
@@ -305,8 +305,6 @@ var app = {
 
         var WifiManager = cordova.plugins.WifiManager;
         WifiManager.onwifistatechanged = data => {
-          console.log('onwifistatechanged', data);
-
           if (data.wifiState == 'ENABLED' && speech_result.length) {
             var success = false;
             var tries = 0;
@@ -346,10 +344,10 @@ var app = {
         // Calibration buttons.
         [0,1].map(c => {
           document.getElementsByClassName('calibrate'+(c+1))[0].onclick = () => {
-            positioning.state = c;
-            positioning.pathloss = {};
-            positioning.log[c] = {};
-            positioning.rssi[c] = {};
+            pos.state = c;
+            pos.pathloss = {};
+            pos.log[c] = {};
+            pos.rssi[c] = {};
           };
         });
 
@@ -376,9 +374,7 @@ var app = {
         document.getElementsByClassName('ip')[0].onclick = () => {
           navigator.notification.prompt(
             'Set target IP address:',
-            res => {
-              ip = res.input1;
-            },
+            res => {ip = res.input1},
             'IP address',
             ['OK', 'Cancel']
           )
@@ -388,13 +384,10 @@ var app = {
         document.getElementsByClassName('speak')[0].onclick = () => {
           WifiManager.setWifiEnabled(false, (e, s) => {
             window.plugins.speechRecognition.requestPermission(() => {
-              console.log('Starting listening.');
               window.plugins.speechRecognition.startListening(res => {
                 speech_result = res[0];
-                console.log('speech result:', speech_result)
 
                 WifiManager.setWifiEnabled(true, (e, s) =>  {
-                  console.log('Enabling forest3 network.');
                   WifiManager.enableNetwork('forest3', true);
                 });
               }, {lang: 'en-US', showPopop: true});

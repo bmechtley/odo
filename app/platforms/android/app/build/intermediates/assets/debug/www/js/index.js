@@ -219,6 +219,7 @@ var app = {
 
     // When Bluetooth device is discovered.
     onDeviceDiscovered: device => {
+      console.log(device);
       if (
         device &&
         device.hasOwnProperty('name') &&
@@ -305,8 +306,6 @@ var app = {
 
         var WifiManager = cordova.plugins.WifiManager;
         WifiManager.onwifistatechanged = data => {
-          console.log('onwifistatechanged', data);
-
           if (data.wifiState == 'ENABLED' && speech_result.length) {
             var success = false;
             var tries = 0;
@@ -376,9 +375,7 @@ var app = {
         document.getElementsByClassName('ip')[0].onclick = () => {
           navigator.notification.prompt(
             'Set target IP address:',
-            res => {
-              ip = res.input1;
-            },
+            res => {ip = res.input1},
             'IP address',
             ['OK', 'Cancel']
           )
@@ -388,13 +385,10 @@ var app = {
         document.getElementsByClassName('speak')[0].onclick = () => {
           WifiManager.setWifiEnabled(false, (e, s) => {
             window.plugins.speechRecognition.requestPermission(() => {
-              console.log('Starting listening.');
               window.plugins.speechRecognition.startListening(res => {
                 speech_result = res[0];
-                console.log('speech result:', speech_result)
 
                 WifiManager.setWifiEnabled(true, (e, s) =>  {
-                  console.log('Enabling forest3 network.');
                   WifiManager.enableNetwork('forest3', true);
                 });
               }, {lang: 'en-US', showPopop: true});
