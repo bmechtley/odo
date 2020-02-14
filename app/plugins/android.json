@@ -10,9 +10,6 @@
     "cordova-plugin-osc": {
       "PACKAGE_NAME": "edu.asu.ame.odo"
     },
-    "odosensors": {
-      "PACKAGE_NAME": "edu.asu.ame.odo"
-    },
     "cordova-plugin-device": {
       "PACKAGE_NAME": "edu.asu.ame.odo"
     },
@@ -26,6 +23,9 @@
       "PACKAGE_NAME": "edu.asu.ame.odo"
     },
     "cordova-plugin-android-wifi-manager": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "odosensors": {
       "PACKAGE_NAME": "edu.asu.ame.odo"
     }
   },

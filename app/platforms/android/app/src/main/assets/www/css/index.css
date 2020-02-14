@@ -15,7 +15,6 @@ body {
     text-transform:uppercase;
     width:100%;
     color: #ebeaee;
-
 }
 
 button {
@@ -25,7 +24,7 @@ button {
   color: #eaebee;
 }
 /* Portrait layout (default) */
-.app {
+#app {
     text-align:center;
     height: 40em;
     margin-top: auto;
@@ -33,7 +32,7 @@ button {
 }
 /* Landscape layout (with min-width) */
 @media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {
-    .app {
+    #app {
         background-position:left center;
         padding:75px 0px 75px 170px;  /* padding-top + padding-bottom + text area = image height */
         margin:-90px 0px 0px -198px;  /* offset vertical: half of image height */
@@ -86,47 +85,41 @@ h1 {
     -webkit-animation:fade 3000ms infinite;
 }
 
-.calculations {
+#calculations {
     width: 100%;
     padding: 1em;
 }
 
-.calibration {
+#calibration {
   width: 30em;
   margin: auto;
   padding: 1em;
   text-align: center;
 }
 
-.calculations td {
+#calculations td {
 }
 
-.completion {
-
-}
-
-.position {
+#completion {
 
 }
 
-.calibrate1 {
+#position {
+
+}
+
+#calibrate1, #calibrate2 {
   width: 10em;
   height: 4em;
   margin: 0;
 }
 
-.calibrate2 {
-  width: 10em;
-  height: 4em;
-  margin: 0;
-}
-
-.calculations td, .calculations th {
+#calculations td, #calculations th {
   text-align: right;
   margin: 2em;
 }
 
-.speak {
+#speak {
   width: 8em;
   height: 2.5em;
   font-size: 3em;
@@ -134,7 +127,7 @@ h1 {
   margin-bottom: 1em
 }
 
-.speak2 {
+#speak2 {
   width: 8em;
   height: 2.5em;
   font-size: 1.5em;
@@ -142,7 +135,7 @@ h1 {
 }
 
 
-.ip {
+#ip {
   width: 8em;
   height: 2.5em;
   font-size: 1.5em;

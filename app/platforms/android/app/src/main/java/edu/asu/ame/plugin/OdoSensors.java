@@ -71,7 +71,7 @@ public class OdoSensors extends CordovaPlugin implements SensorEventListener {
     }
 
     public void start() {
-      this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), this.sensorManager.SENSOR_DELAY_NORMAL);
+      this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), this.sensorManager.SENSOR_DELAY_NORMAL);
       this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), this.sensorManager.SENSOR_DELAY_NORMAL);
       this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), this.sensorManager.SENSOR_DELAY_NORMAL);
       this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE), this.sensorManager.SENSOR_DELAY_NORMAL);
@@ -99,7 +99,7 @@ public class OdoSensors extends CordovaPlugin implements SensorEventListener {
 
           long timestamp = System.currentTimeMillis();
 
-          if (sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+          if (sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
             this.accelerometer = value;
             this.accelerometer_time = timestamp;
           } else if (sensor.getType() == Sensor.TYPE_PRESSURE) {

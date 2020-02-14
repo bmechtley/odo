@@ -3,9 +3,6 @@
     <feature name="OSC">
         <param name="android-package" value="nl.sylvain.cordova.osc.OSCUtils" />
     </feature>
-    <feature name="OdoSensors">
-        <param name="android-package" value="edu.asu.ame.plugin.OdoSensors" />
-    </feature>
     <feature name="Device">
         <param name="android-package" value="org.apache.cordova.device.Device" />
     </feature>
@@ -18,6 +15,9 @@
     <feature name="WifiManagerPlugin">
         <param name="android-package" value="dk.kapetanovic.wifimanager.WifiManagerPlugin" />
         <param name="onload" value="true" />
+    </feature>
+    <feature name="OdoSensors">
+        <param name="android-package" value="edu.asu.ame.plugin.OdoSensors" />
     </feature>
     <feature name="BLE">
         <param name="android-package" value="com.megster.cordova.ble.central.BLECentralPlugin" />

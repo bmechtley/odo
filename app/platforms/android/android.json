@@ -13,10 +13,6 @@
               "count": 1
             },
             {
-              "xml": "<feature name=\"OdoSensors\"><param name=\"android-package\" value=\"edu.asu.ame.plugin.OdoSensors\" /></feature>",
-              "count": 1
-            },
-            {
               "xml": "<feature name=\"Device\"><param name=\"android-package\" value=\"org.apache.cordova.device.Device\" /></feature>",
               "count": 1
             },
@@ -34,6 +30,10 @@
             },
             {
               "xml": "<feature name=\"WifiManagerPlugin\"><param name=\"android-package\" value=\"dk.kapetanovic.wifimanager.WifiManagerPlugin\" /><param name=\"onload\" value=\"true\" /></feature>",
+              "count": 1
+            },
+            {
+              "xml": "<feature name=\"OdoSensors\"><param name=\"android-package\" value=\"edu.asu.ame.plugin.OdoSensors\" /></feature>",
               "count": 1
             }
           ],
@@ -96,9 +96,6 @@
     "cordova-plugin-osc": {
       "PACKAGE_NAME": "edu.asu.ame.odo"
     },
-    "odosensors": {
-      "PACKAGE_NAME": "edu.asu.ame.odo"
-    },
     "cordova-plugin-device": {
       "PACKAGE_NAME": "edu.asu.ame.odo"
     },
@@ -113,6 +110,9 @@
     },
     "cordova-plugin-android-wifi-manager": {
       "PACKAGE_NAME": "edu.asu.ame.odo"
+    },
+    "odosensors": {
+      "PACKAGE_NAME": "edu.asu.ame.odo"
     }
   },
   "dependent_plugins": {},
@@ -123,14 +123,6 @@
       "pluginId": "cordova-plugin-osc",
       "clobbers": [
         "window.OSC"
-      ]
-    },
-    {
-      "id": "odosensors.odosensors",
-      "file": "plugins/odosensors/www/odosensors.js",
-      "pluginId": "odosensors",
-      "clobbers": [
-        "odosensors"
       ]
     },
     {
@@ -180,15 +172,23 @@
       "clobbers": [
         "cordova.plugins.WifiManager"
       ]
+    },
+    {
+      "id": "odosensors.odosensors",
+      "file": "plugins/odosensors/www/odosensors.js",
+      "pluginId": "odosensors",
+      "clobbers": [
+        "odosensors"
+      ]
     }
   ],
   "plugin_metadata": {
     "cordova-plugin-osc": "1.0.3",
-    "odosensors": "0.7.0",
     "cordova-plugin-device": "2.0.3",
     "cordova-plugin-ble-central": "1.2.4",
     "cordova-plugin-speechrecognition": "1.1.2",
     "cordova-plugin-dialogs": "2.0.2",
-    "cordova-plugin-android-wifi-manager": "1.0.0"
+    "cordova-plugin-android-wifi-manager": "1.0.0",
+    "odosensors": "0.7.0"
   }
 }

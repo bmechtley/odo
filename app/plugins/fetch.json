@@ -1,12 +1,4 @@
 {
-  "odosensors": {
-    "source": {
-      "type": "local",
-      "path": "/Users/brandon/Desktop/odo/node_modules/OdoSensors"
-    },
-    "is_top_level": true,
-    "variables": {}
-  },
   "cordova-plugin-osc": {
     "source": {
       "type": "registry",
@@ -51,6 +43,14 @@
     "source": {
       "type": "registry",
       "id": "cordova-plugin-android-wifi-manager@^1.2.1"
+    },
+    "is_top_level": true,
+    "variables": {}
+  },
+  "odosensors": {
+    "source": {
+      "type": "local",
+      "path": "/Users/brandon/github/odo/app/node_modules/OdoSensors"
     },
     "is_top_level": true,
     "variables": {}

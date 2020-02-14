@@ -20,8 +20,7 @@
     "cordova-plugin-device": "^2.0.3",
     "cordova-plugin-dialogs": "^2.0.2",
     "cordova-plugin-osc": "^1.0.3",
-    "cordova-plugin-speechrecognition": "^1.2.0",
-    "odosensors": "../odosensors"
+    "cordova-plugin-speechrecognition": "^1.2.0"
   },
   "devDependencies": {},
   "bundleDependencies": [],
@@ -64,13 +63,13 @@
       "ios"
     ],
     "plugins": {
-      "odosensors": {},
       "cordova-plugin-osc": {},
       "cordova-plugin-device": {},
       "cordova-plugin-ble-central": {},
       "cordova-plugin-speechrecognition": {},
       "cordova-plugin-dialogs": {},
-      "cordova-plugin-android-wifi-manager": {}
+      "cordova-plugin-android-wifi-manager": {},
+      "odosensors": {}
     }
   }
 }

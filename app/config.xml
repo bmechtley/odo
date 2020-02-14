@@ -22,13 +22,13 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <plugin name="odosensors" spec="../odosensors" />
     <plugin name="cordova-plugin-osc" spec="^1.0.3" />
     <plugin name="cordova-plugin-device" spec="^2.0.3" />
     <plugin name="cordova-plugin-ble-central" spec="^1.2.4" />
     <plugin name="cordova-plugin-speechrecognition" spec="^1.2.0" />
     <plugin name="cordova-plugin-dialogs" spec="^2.0.2" />
     <plugin name="cordova-plugin-android-wifi-manager" spec="^1.2.1" />
+    <plugin name="odosensors" spec="../odosensors" />
     <engine name="android" spec="^7.1.4" />
     <engine name="ios" spec="^4.5.5" />
 </widget>

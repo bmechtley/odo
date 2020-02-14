@@ -99,10 +99,7 @@ Array.fill = function(value, len) {
 };
 
 function arr_distance(p1, p2) {
-	var d1 = p1[0]-p2[0];
-	var d2 = p1[1]-p2[1];
-
-	return Math.sqrt(d1*d1+d2*d2);
+  return Math.sqrt(arr_subtract(p1, p2).reduce((s, a) => s + (a * a)));
 }
 
 function arr_subtract(a, b) {
@@ -112,12 +109,20 @@ function arr_subtract(a, b) {
     return a.map(function(ai, i) { return ai - b });
 }
 
+function arr_multiply(a, b) {
+  if (Array.isArray(b))
+    return a.map(function(ai, i) { return ai * b[i] });
+  else {
+    return a.map(function(ai, i) { return ai * b });
+  }
+}
+
 function find_position(points, distances, alpha=2, iter=2000, ratio=0.99) {
-	var res = [0, 0];
+	var res = [0, 0, 0];
 	var inv_len = 1.0 / points.length;
 
 	for (var i = 0; i < iter; i++) {
-		var delta = [0, 0];
+		var delta = [0, 0, 0];
 
 		for (var p = 0; p < points.length; p++) {
 			var diff = arr_subtract(points[p], res);
@@ -133,23 +138,24 @@ function find_position(points, distances, alpha=2, iter=2000, ratio=0.99) {
 
 	return res;
 }
-/*
-var p = [[0,0], [0,1], [1, 1], [1, 0]];
-var distance_tests = [.1, Math.sqrt(.5), .5, 1, 10];
-for (var i in distance_tests) {
-  var distance = distance_tests[i];
-  var distances = Array.fill(distance, 4);
-  var dstr = distance.toPrecision(2);
-  var position = find_position(p, distances);
-  var sum = distances.sum();
-  var distances_scaled = distances.map(d => d / sum);
-  var position_scaled = find_position(p, distances_scaled);
 
-  console.log(
-    distances.toPrecision(2) + '',
-    position.toPrecision(2) + '\t',
-    distances_scaled.toPrecision(2) + '',
-    position_scaled.toPrecision(2)
-  );
+if (typeof require !== 'undefined' && require.main === module) {
+  var p = [[0,0], [0,1], [1, 1], [1, 0]];
+  var distance_tests = [.1, Math.sqrt(.5), .5, 1, 10];
+  for (var i in distance_tests) {
+    var distance = distance_tests[i];
+    var distances = Array.fill(distance, 4);
+    var dstr = distance.toPrecision(2);
+    var position = find_position(p, distances);
+    var sum = distances.sum();
+    var distances_scaled = distances.map(d => d / sum);
+    var position_scaled = find_position(p, distances_scaled);
+
+    console.log(
+      distances.toPrecision(2) + '',
+      position.toPrecision(2) + '\t',
+      distances_scaled.toPrecision(2) + '',
+      position_scaled.toPrecision(2)
+    );
+  }
 }
-*/

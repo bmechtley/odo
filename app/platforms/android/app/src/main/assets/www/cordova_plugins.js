@@ -9,14 +9,6 @@ module.exports = [
     ]
   },
   {
-    "id": "odosensors.odosensors",
-    "file": "plugins/odosensors/www/odosensors.js",
-    "pluginId": "odosensors",
-    "clobbers": [
-      "odosensors"
-    ]
-  },
-  {
     "id": "cordova-plugin-device.device",
     "file": "plugins/cordova-plugin-device/www/device.js",
     "pluginId": "cordova-plugin-device",
@@ -63,18 +55,26 @@ module.exports = [
     "clobbers": [
       "cordova.plugins.WifiManager"
     ]
+  },
+  {
+    "id": "odosensors.odosensors",
+    "file": "plugins/odosensors/www/odosensors.js",
+    "pluginId": "odosensors",
+    "clobbers": [
+      "odosensors"
+    ]
   }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
   "cordova-plugin-osc": "1.0.3",
-  "odosensors": "0.7.0",
   "cordova-plugin-device": "2.0.3",
   "cordova-plugin-ble-central": "1.2.4",
   "cordova-plugin-speechrecognition": "1.1.2",
   "cordova-plugin-dialogs": "2.0.2",
-  "cordova-plugin-android-wifi-manager": "1.0.0"
+  "cordova-plugin-android-wifi-manager": "1.0.0",
+  "odosensors": "0.7.0"
 };
 // BOTTOM OF METADATA
 });
