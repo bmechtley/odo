@@ -71,7 +71,7 @@ public class OdoSensors extends CordovaPlugin implements SensorEventListener {
     }
 
     public void start() {
-      this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), this.sensorManager.SENSOR_DELAY_NORMAL);
+      this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), this.sensorManager.SENSOR_DELAY_NORMAL);
       this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), this.sensorManager.SENSOR_DELAY_NORMAL);
       this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), this.sensorManager.SENSOR_DELAY_NORMAL);
       this.sensorManager.registerListener(this, this.sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE), this.sensorManager.SENSOR_DELAY_NORMAL);

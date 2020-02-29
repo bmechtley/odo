@@ -1,5 +1,5 @@
 #Internal package file, do not edit.
-#Sat Feb 08 21:26:25 MST 2020
+#Mon Feb 24 16:09:42 MST 2020
 17.baseType=DIRECTORY
 4.path=www/plugins/cordova-plugin-osc/www/OSC.js
 25.base=/Users/brandon/github/odo/app/platforms/android/app/build/intermediates/assets/debug

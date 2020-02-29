@@ -1,17 +1,54 @@
 // Max/MSP server.
-var ip = '10.0.1.30';
+var ip = '2.1.0.2';
 var port = 2020;
-
+var receive_port = 2021;
+var enable_positioning = false;
 // Parameters.
-var sensor_speed = 100;             // time between sensor readings (ms)
-var points = [[0,0,1], [0,1,1], [1,0,1], [1,1,1], [0.5,0.5,1]];
+var sensor_speed = 200;             // time between sensor readings (ms)
+
+// TESTING
+/*
+var points = [[0,0,0]];
+var locations = [{point: 0, beacons: ['iStage5_37']}];
+var calpoints = [[0,0,0],[1,0,0]];
+var stagedim = [100,100,100];
+*/
+
+// REAL
+/*
+var points = [[0,0,1],[0,1,1],[1,0,1],[1,1,1],[0.5,0.5,1]];
 var locations = [
-  {point: 0, beacons: ['iStage1_37']},//, 'iStage1_38', 'iStage1_39']},
-  {point: 1, beacons: ['iStage2_37']},//, 'iStage2_38', 'iStage2_39']},
-  {point: 2, beacons: ['iStage3_37']},// 'iStage3_38', 'iStage3_39']},
-  {point: 3, beacons: ['iStage4_37']},// 'iStage4_38', 'iStage4_39']},
-  {point: 4, beacons: ['iStage5_37']}//, 'iStage5_38', 'iStage5_39']}
+  {point: 0, beacons: ['iStage1_37', 'iStage1_38', 'iStage1_39']},
+  {point: 1, beacons: ['iStage2_37', 'iStage2_38', 'iStage2_39']},
+  {point: 2, beacons: ['iStage3_37', 'iStage3_38', 'iStage3_39']},
+  {point: 3, beacons: ['iStage4_37', 'iStage4_38', 'iStage4_39']},
+  {point: 4, beacons: ['iStage5_37', 'iStage5_38', 'iStage5_39']}
 ];
+var calpoints = [[1,0,0],[.5,.5,0]];//0.333]];  // calibration points
+var stagedim = [676,584,330];             // cm
+*/
+
+// TEST 2
+var points = [
+  [0,5/5,.889], [1,5/5,.889],
+  [0,4/5,.889], [1,4/5,.889],
+  [0,3/5,.889], [1,3/5,.889],
+  [0,2/5,.889], [1,2/5,1],
+  [0,1/5,.889], [1,1/5,.889],
+  [0,0/5,.889], [1,0/5,.889]
+];
+var locations = [
+  {point: 0, beacons: ['odo_6']}, {point: 1, beacons: ['odo_7']},
+  {point: 2, beacons: ['odo_5']}, {point: 3, beacons: ['odo_8']},
+  {point: 4, beacons: ['odo_4']}, {point: 5, beacons: ['odo_9']},
+  {point: 6, beacons: ['odo_3']}, {point: 7, beacons: ['odo_10']},
+  {point: 8, beacons: ['odo_2']}, {point: 9, beacons: ['odo_11']},
+  {point: 10, beacons: ['odo_1']}, {point: 11, beacons: ['odo_12']}
+];
+
+var calpoints = [[0,0,0],[1,1,0]]
+var stagedim = [494,776,450];
+
 var beacon_points = {};
 var beacon_indices = {};
 var beacons = [];
@@ -25,14 +62,17 @@ for (var i = 0; i < locations.length; i++) {
   }
 }
 
-var calpoints = [[0,0,0],[.5,.5,0.333]];  // calibration points
-var stagedim = [676,584,330];           // cm
-var calibration_count = 128;             // number of calibration measurements to collect.
+var calibration_count = 128;              // number of calibration measurements to collect.
+var filter_length = 20;
+var filter_percentile = 99;
 
 // Global variables.
-var tds = {};                           // DOM elements for data display.
-var osc;                                // OSC server.
-var uuid;                               // UUID of phone.
+var tds = {};                             // DOM elements for data display.
+var osc;                                  // OSC server.
+var uuid;                                 // UUID of phone.
+var pressure_calibration = new Array(20);
+var pressure_calibration_pt = 0;
+var pressure_calibration_amt = 0;
 
 // Median filter.
 const median = arr => {
@@ -41,18 +81,36 @@ const median = arr => {
   return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
 };
 
-class MedianFilter {
-  constructor(width) {
-    this.history = [];
-    this.width = width;
+const percentile = (arr, p) => {
+    const ptf = arr.length * (p / 100),
+      nums = [...arr].sort((a, b) => a - b);
+    var pt = Math.floor(ptf);
+    if (pt < ptf) {
+      var amt = ptf - pt;
+      return (nums[pt - 1] * (1 - amt)) + (nums[pt] * amt);
+    } else
+      return nums[pt - 1];
+}
+
+const mean = arr => {
+  return arr.reduce((s, a) => s + a) / arr.length;
+}
+
+class PercentileFilter {
+  constructor(width, perc) {
+    this.history = new Array(width);
+    this.pos = 0;
+    this.filled = false;
+    this.percentile = perc;
+    this.method = this.percentile == 50 ? median : a => percentile(a, this.percentile);
   }
 
   filter(value) {
-    this.history.push(value)
-    if (this.history.length > this.width)
-      this.history.splice(0, 1);
+    this.history[this.pos] = value;
+    this.pos = this.pos >= this.history.length ? 0 : this.pos + 1;
+    if (this.pos == 0) this.filled = true;
 
-    return median(this.history);
+    return this.method(this.history);//this.filled ? this.history : this.history.splice(0, this.pos));
   }
 };
 
@@ -86,37 +144,42 @@ var pos = {
   distances: {},      // Distance to each beacon.
   position: [],       // Calculated position
   scaled_points: points.map(p => arr_multiply(p, stagedim)),
+  new_distances: false,
+  calibration_log: [{}, {}],      // Lists of RSSIs for each beacon for each calib. point.
   calibration_rssi: [{}, {}],     // avg. RSSI for each beacon for each calib. point.
-  calibration_log: [{}, {}],      // RSSIs for each beacon for each calib. point.
   calibration_pathloss: [{}, {}], // Pathloss eponent for each beacon for each calib. point.
-  filters: beacons.map(b => new MedianFilter(20)),
+  filters: beacons.map(b => new PercentileFilter(filter_length, filter_percentile)),
   point_distances: points.map(l => -1),
   calibration_distances: [0,1].map(c => locations.map(l => arr_distance(arr_multiply(points[l.point], stagedim), arr_multiply(calpoints[c], stagedim)))),
 
   // Return the minimum number of calibration points that have been collected across beacons.
-  min_calibration_complete: () => [0,1].map(state => beacons.reduce((acc, b) =>
-    pos.calibration_log[state].hasOwnProperty(b) ? Math.min(pos.calibration_log[state][b].length, acc) : 0,
+  min_calibration_complete: () => [0,1].map(c => beacons.reduce((acc, b) =>
+    pos.calibration_log[c].hasOwnProperty(b) ? Math.min(pos.calibration_log[c][b].length, acc) : 0,
     9999
   )),
 
   // Collect calibration measurements for each calibration point.
   collect_calibration_measurements: device => {
-    if (!pos.calibration_log[pos.state].hasOwnProperty(device.name))
-      pos.calibration_log[pos.state][device.name] = [];
+    var logs = pos.calibration_log[pos.state];
 
-    pos.calibration_log[pos.state][device.name].push(pos.rssis[device.name]);
+    if (!logs.hasOwnProperty(device.name))
+      logs[device.name] = {log: new Array(calibration_count), pos: 0, filled: false, length: 0};
 
-    if (
-      pos.calibration_log[pos.state][device.name].length >
-      calibration_count
-    )
-      pos.calibration_log[pos.state][device.name].splice(0, 1);
+    let l = pos.calibration_log[pos.state][device.name];
+    l.log[l.pos] = device.rssi;
+    l.pos = (l.pos == calibration_count - 1) ? 0 : l.pos + 1;
+    if (l.pos == 0) l.filled = true;
+    l.length = l.filled ? calibration_count : l.pos;
   },
 
   // Compute average RSSI across calibration window.
-  compute_calibration_rssis: (c) => {
+  compute_calibration_rssis: c => {
     beacons.map(b => {
-      pos.calibration_rssi[c][b] = median(pos.calibration_log[pos.state][b]);
+      var l = pos.calibration_log[c][b];
+      pos.calibration_rssi[c][b] = Math.max(...l.log);/*percentile(
+        l.filled ? l.log : l.log.splice(0, l.pos),
+        filter_percentile
+      );*/
     });
   },
 
@@ -151,14 +214,18 @@ var pos = {
 
   // Triangulate position from distances.
   triangulate: () => {
-    if (
-      pos.state == 'done' &&
-      pos.point_distances.reduce((a, p) => a && (p > -1), true)
-    ) {
-      console.log(pos.scaled_points, pos.point_distances);
-      pos.position = find_position(pos.scaled_points.slice(3), pos.point_distances.slice(3), alpha=2, iter=500, ratio=0.99);
-    } else
-      pos.position = [0, 0, 0];
+    if (pos.new_distances) {
+      pos.new_distances = false;
+
+      pos.position = (
+        pos.state == 'done' &&
+        pos.point_distances.reduce((a, p) => a && (p > -1), true)
+      ) ? find_position(
+        pos.scaled_points.slice(3),
+        pos.point_distances.slice(3),
+        alpha=2, iter=500, ratio=0.99
+      ) : [0,0,0];
+    }
   },
 
   // Update calibration with a beacons's RSSI.
@@ -172,7 +239,6 @@ var pos = {
     */
     if (pos.state == 0 || pos.state == 1) {
         pos.collect_calibration_measurements(device);
-
         var c = pos.min_calibration_complete();
 
         if (c[pos.state] == calibration_count) {
@@ -230,13 +296,12 @@ var app = {
 
         pos.update(device);             // Calibration.
         pos.compute_distance(device);   // Compute distance to beacons.
-        app.update_measurement_text();
 
         if ((old_state == 0 || old_state == 1) && pos.state != old_state)
           app.update_calibration_text(old_state);
 
         if (pos.state == 'done') {
-          pos.triangulate(); // Triangulate position.
+          pos.new_distances = true;
 
           var values = [uuid];
           values.push.apply(values, pos.position);
@@ -275,11 +340,12 @@ var app = {
       for (var i = 0; i < beacons.length; i++) {
         var b = beacons[i];
 
-        if (pos.rssis.hasOwnProperty(b)) tds[b].rssi.innerHTML = pos.rssis[b].toFixed(2);
+        if (pos.rssis.hasOwnProperty(b) && typeof pos.rssis[b] === 'number')
+          tds[b].rssi.innerHTML = pos.rssis[b].toFixed(2);
 
-        if (pos.state == 'done') {
+        if (pos.state == 'done' && typeof pos.point_distances[beacon_indices[b]] === 'number')
           tds[b].dist.innerHTML = pos.point_distances[beacon_indices[b]].toFixed(2);
-        } else if (pos.distances.hasOwnProperty(b))
+        else if (pos.distances.hasOwnProperty(b) && typeof pos.distances[b] === 'number')
           tds[b].dist.innerHTML = pos.distances[b].toFixed(2);
       }
 
@@ -298,66 +364,110 @@ var app = {
 
     // When app is ready.
     onDeviceReady: () => {
-        // Populate the data readout table.
-        var table = document.getElementById('calculations');
-
-        for (var i = 0; i < beacons.length; i++) {
-          var b = beacons[i];
-          var tr = document.createElement('tr');
-          tds[b] = {};
-          ['name', 'ple', 'rssi_0', 'rssi_1', 'd_0', 'd_1', 'rssi', 'dist'].map(tdname => {
-            tds[b][tdname] = document.createElement('td');
-            tr.appendChild(tds[b][tdname]);
-          });
-
-          tds[b].name.innerHTML = b;
-
-          table.appendChild(tr);
-        }
-
-        [0,1].map(c => app.update_calibration_text(c));
-        /*
-        var cal_storage = window.localStorage.getItem('calibration');
-        if (cal_storage != null) {
-          console.log('Updating calibration from local storage.')
-          pos.calibration_rssi = cal_storage.calibration_rssi;
-          pos.calibration_pathloss = cal_storage.calibration_pathloss;
-          pos.state = 'done';
-        }
-        */
-        // OSC.
-        osc = new OSC();
-        odosensors.start();
         uuid = device.uuid;
 
+        // OSC.
+        osc = new OSC();
+        osc.startListening(receive_port);
+
+        osc.send({
+          remoteAddress: ip,
+          remotePort: port,
+          address: '/join',
+          arguments: [uuid]
+        });
+
+        osc.on('/color', message => {
+          var a = message.arguments;
+          if (a[0] == uuid)
+            document.body.style.backgroundColor = 'rgb(' + [a[1],a[2],a[3]].map(v => Math.floor(v * 255)).join(',') + ')';
+        });
+
+        osc.on('/sensor_speed', message => {
+          sensor_speed = message.arguments[0];
+        })
+
         // Update sensors.
+        odosensors.start();
+
         setInterval(() => {
           odosensors.getAccelerometer(v => sensors.update(0, Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])));
           odosensors.getOrientation(v => sensors.update(1, v));
-          odosensors.getPressure(v => sensors.update(2, v));
+          odosensors.getPressure(v => {
+            if (typeof v[0] === 'number') {
+              if (pressure_calibration_pt < pressure_calibration.length)
+                pressure_calibration[pressure_calibration_pt] = v[0];
+              else if (pressure_calibration_pt == pressure_calibration.length) {
+                console.log(pressure_calibration, pressure_calibration.reduce((s,a)=>s+a,0), pressure_calibration.length);
+                pressure_calibration_amt = pressure_calibration.reduce((s, a) => s + a, 0) / pressure_calibration.length;
+              } else
+                sensors.update(2, [v[0] - pressure_calibration_amt]);
+
+              console.log(pressure_calibration_pt, pressure_calibration_amt, v[0] - pressure_calibration_amt);
+
+              pressure_calibration_pt += 1;
+            }
+          });
         }, sensor_speed);
 
-        // Bluetooth scanning.
-        ble.startScanWithOptions([], {reportDuplicates: true}, app.onDeviceDiscovered, () => {console.log("BLE scan error!")});
+        if (enable_positioning) {
+          // Populate the data readout table.
+          var table = document.getElementById('calculations');
 
-        // Calibration buttons.
-        [0,1].map(c => {
-          document.getElementById('calibrate'+(c+1)).onclick = () => {
-            pos.state = c;
-            pos.calibration_pathloss = {};
-            pos.calibration_log[c] = {};
-            pos.calibration_rssi[c] = {};
-          };
-        });
+          for (var i = 0; i < beacons.length; i++) {
+            var b = beacons[i];
+            var tr = document.createElement('tr');
+            tds[b] = {};
+            ['name', 'ple', 'rssi_0', 'rssi_1', 'd_0', 'd_1', 'rssi', 'dist'].map(tdname => {
+              tds[b][tdname] = document.createElement('td');
+              tr.appendChild(tds[b][tdname]);
+            });
 
-        // Set target IP for OSC packets.
-        document.getElementById('ip').onclick = () => {
-          navigator.notification.prompt(
-            'Set target IP address:',
-            res => {ip = res.input1},
-            'IP address',
-            ['OK', 'Cancel']
-          )
+            tds[b].name.innerHTML = b;
+
+            table.appendChild(tr);
+          }
+
+          /*
+          var cal_storage = window.localStorage.getItem('calibration');
+          if (cal_storage != null) {
+            console.log('Updating calibration from local storage.')
+            pos.calibration_rssi = cal_storage.calibration_rssi;
+            pos.calibration_pathloss = cal_storage.calibration_pathloss;
+            pos.state = 'done';
+          }
+          */
+
+          // Triangulate position.
+          setInterval(pos.triangulate, 100);
+
+          // Update debug text.
+          setInterval(() => [0,1].map(c => app.update_calibration_text(c)) && app.update_measurement_text(), 2000);
+
+
+          // Bluetooth scanning.
+          ble.startScanWithOptions([], {reportDuplicates: true}, app.onDeviceDiscovered, () => {console.log("BLE scan error!")});
+
+
+          // Calibration buttons.
+          [0,1].map(c => {
+            document.getElementById('calibrate'+(c+1)).onclick = () => {
+              pos.state = c;
+              pos.calibration_pathloss = {};
+              pos.calibration_log[c] = {};
+              pos.calibration_rssi[c] = {};
+            };
+          });
+
+          // Set target IP for OSC packets.
+          document.getElementById('ip').onclick = () => {
+            navigator.notification.prompt(
+              'Set target IP address:',
+              res => {ip = res.input1},
+              'IP address',
+              ['OK', 'Cancel']
+            )
+          }
         }
 
         // When WiFi turns back on, send out the speech
@@ -371,8 +481,7 @@ var app = {
             args.push.apply(args, speech_result.split(' '));
 
             var oscint = setInterval(() => {
-              osc.send(
-                {
+              osc.send({
                   remoteAddress: ip,
                   remotePort: port,
                   address: '/speak',

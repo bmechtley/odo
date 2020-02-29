@@ -106,7 +106,7 @@ module.exports = {
             convertToNativeJS(peripheral);
             success(peripheral);
         };
-        cordova.exec(successWrapper, failure, 'BLE', 'connect', [device_id]);    
+        cordova.exec(successWrapper, failure, 'BLE', 'connect', [device_id]);
     },
 
     autoConnect: function (deviceId, connectCallback, disconnectCallback) {
@@ -119,19 +119,19 @@ module.exports = {
             connectCallback(peripheral);
         };
 
-        // iOS needs to reconnect on disconnect, unless ble.disconnect was called. 
+        // iOS needs to reconnect on disconnect, unless ble.disconnect was called.
         if (cordova.platformId === 'ios') {
             disconnectCallbackWrapper = function(peripheral) {
                 // let the app know the peripheral disconnected
                 disconnectCallback(peripheral);
-    
+
                 // reconnect if we have a peripheral.id and the user didn't call disconnect
                 if (peripheral.id && autoconnected[peripheral.id]) {
                     cordova.exec(connectCallbackWrapper, disconnectCallbackWrapper, 'BLE', 'autoConnect', [deviceId]);
                 }
-            };    
+            };
         } else {  // no wrapper for Android
-            disconnectCallbackWrapper = disconnectCallback; 
+            disconnectCallbackWrapper = disconnectCallback;
         }
 
         cordova.exec(connectCallbackWrapper, disconnectCallbackWrapper, 'BLE', 'autoConnect', [deviceId]);
